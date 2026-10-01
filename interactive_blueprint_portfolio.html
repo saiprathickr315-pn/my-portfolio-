@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAI PRATHICK R | Interactive 3D Blueprint Portfolio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Three.js for 3D Background Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blueprint: {
+                            50: '#f0f5ff',
+                            100: '#dbeafe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        building: {
+                            steel: '#1e293b',
+                            concrete: '#e2e8f0',
+                            accent: '#f97316', // Architectural safety orange accent
+                        },
+                        canvas: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Subtle Architectural Background Grid */
+        .blueprint-bg-grid {
+            background-image: 
+                linear-gradient(to right, rgba(2, 132, 199, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(2, 132, 199, 0.08) 1px, transparent 1px),
+                linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+        }
+
+        /* Highly Legible Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(2, 132, 199, 0.2);
+            box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255,255,255,0.8) inset;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 4px;
+        }
+
+        /* Profile Image Hero Styling with Expression/Smile Micro-Enhancement */
+        .profile-container {
+            position: relative;
+        }
+
+        .profile-img-wrapper {
+            position: relative;
+            box-shadow: 0 20px 50px rgba(2, 132, 199, 0.25);
+            border: 4px solid #ffffff;
+        }
+
+        .profile-img-wrapper img {
+            /* Warm filter and subtle lift for a friendly, natural expression enhancement */
+            filter: contrast(1.05) brightness(1.04) saturate(1.08);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .profile-img-wrapper:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Outer Architectural Rotating Grid Circle */
+        .blueprint-compass-ring {
+            position: absolute;
+            inset: -14px;
+            border: 2px stroke #0284c7;
+            border-style: dashed;
+            border-radius: 9999px;
+            opacity: 0.7;
+            animation: rotateRing 40s linear infinite;
+        }
+
+        @keyframes rotateRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Fixed 3D Canvas Background Styling */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.92;
+        }
+    </style>
+</head>
+<body class="blueprint-bg-grid relative selection:bg-blueprint-100 selection:text-blueprint-700">
+
+    <!-- 3D WEBGL CANVAS BACKGROUND CONTAINER -->
+    <div id="webgl-container"></div>
+
+    <header class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-6xl">
+        <nav class="glass-card rounded-full px-5 md:px-8 py-3 flex items-center justify-between border border-blueprint-100 shadow-md">
+            <!-- Brand / Name -->
+            <a href="#site" class="flex items-center gap-3 group">
+                <div class="w-3.5 h-3.5 rounded-full bg-blueprint-600 group-hover:scale-125 transition-transform shadow-sm shadow-blueprint-500"></div>
+                <span class="font-mono text-sm font-bold tracking-wider text-slate-900">SAI PRATHICK R</span>
+            </a>
+
+            <!-- Desk Nav Links -->
+            <div class="hidden md:flex items-center space-x-6 font-mono text-xs text-slate-700 font-semibold">
+                <a href="#about" class="hover:text-blueprint-600 transition-colors">ABOUT</a>
+                <a href="#vision" class="hover:text-blueprint-600 transition-colors">VISION</a>
+                <a href="#education" class="hover:text-blueprint-600 transition-colors">EDUCATION</a>
+                <a href="#skills" class="hover:text-blueprint-600 transition-colors">SKILLS</a>
+                <a href="#projects" class="hover:text-blueprint-600 transition-colors">PROJECTS</a>
+                <a href="#contact" class="hover:text-blueprint-600 transition-colors">CONTACT</a>
+            </div>
+
+            <!-- Stage Counter Indicator -->
+            <div class="flex items-center gap-2">
+                <div class="font-mono text-xs font-bold text-blueprint-700 bg-blueprint-50 px-3.5 py-1.5 rounded-full border border-blueprint-200 shadow-sm flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span id="stage-badge">01/08 SITE</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN SCROLL CONTENT -->
+    <main class="relative z-10">
+
+        <section id="site" class="min-h-screen flex items-center justify-center pt-24 pb-12 px-6 relative">
+            <div class="max-w-4xl mx-auto text-center flex flex-col items-center">
+                
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-blueprint-200 text-xs font-mono font-semibold text-slate-700 mb-8 shadow-sm">
+                    <i class="fa-solid fa-compass text-blueprint-600"></i>
+                    <span>3D SITE INITIALIZED • BENGALURU, KARNATAKA</span>
+                </div>
+
+                <!-- Personal Image with Framed Profile Container -->
+                <div class="profile-container mb-8">
+                    <div class="blueprint-compass-ring"></div>
+                    <div class="profile-img-wrapper w-44 h-44 md:w-52 md:h-52 rounded-full overflow-hidden bg-white p-1">
+                        <img src="SAI PASSPORT PHOTO.jpg" 
+                             alt="SAI PRATHICK R" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x400/0284c7/ffffff?text=SAI+PRATHICK+R';" 
+                             class="w-full h-full object-cover rounded-full">
+                    </div>
+                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white font-mono text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border border-blueprint-500 uppercase tracking-widest whitespace-nowrap">
+                        STAGE 01: GROUND
+                    </div>
+                </div>
+
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 mb-3 font-sans drop-shadow-sm">
+                    SAI PRATHICK R
+                </h1>
+
+                <div class="font-mono text-blueprint-600 text-lg md:text-xl font-bold tracking-widest uppercase mb-6 bg-blueprint-50/80 px-4 py-1 rounded-lg border border-blueprint-100 inline-block">
+                    LEARN • BUILD • EVOLVE
+                </div>
+
+                <p class="text-slate-700 max-w-xl text-base md:text-lg font-medium leading-relaxed mb-10 bg-white/60 p-3 rounded-xl border border-slate-200/50">
+                    "Everything starts with a foundation."
+                </p>
+
+                <a href="#about" class="inline-flex flex-col items-center gap-2 group text-slate-600 hover:text-blueprint-600 transition-colors">
+                    <span class="font-mono text-xs font-bold uppercase tracking-widest bg-white/80 px-3 py-1 rounded-md border border-slate-200 shadow-sm">SCROLL TO BUILD 3D STRUCTURE</span>
+                    <div class="w-6 h-10 border-2 border-slate-400 rounded-full flex justify-center pt-2 group-hover:border-blueprint-600 transition-colors bg-white/80">
+                        <div class="w-1.5 h-3 bg-blueprint-600 rounded-full animate-bounce"></div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section id="about" class="min-h-screen flex items-center justify-center py-20 px-6">
+            <div class="max-w-4xl w-full">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="font-mono text-blueprint-600 font-extrabold text-sm tracking-widest">02 / FOUNDATION</span>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-8 md:p-12 relative border border-blueprint-200">
+                    <div class="absolute top-4 right-4 font-mono text-[11px] font-bold text-blueprint-600 bg-blueprint-50 px-2.5 py-1 rounded border border-blueprint-200">CONCRETE_PAD_READY</div>
+
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 font-sans">
+                        ABOUT
+                    </h2>
+
+                    <p class="text-slate-800 text-base md:text-xl leading-relaxed font-medium mb-6">
+                        I’m <span class="font-bold text-blueprint-700">SAI PRATHICK R</span>, a student who enjoys learning, creating, experimenting, and turning ideas into practical projects.
+                    </p>
+
+                    <p class="text-slate-700 text-base md:text-lg leading-relaxed mb-6 font-normal">
+                        My interests span technology, digital creation, AI, electronics, websites, and creative tools. I prefer learning through experimentation and real-world projects — building something, understanding how it works, improving it, and moving on to the next challenge.
+                    </p>
+
+                    <p class="text-slate-700 text-base md:text-lg leading-relaxed font-normal">
+                        I’m still building my foundation and exploring different directions. Rather than defining myself by one particular field, I want this space to represent my progress, the things I create, the skills I develop, and the ideas I explore along the way.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="vision" class="min-h-screen flex items-center justify-center py-20 px-6">
+            <div class="max-w-4xl w-full">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="font-mono text-blueprint-600 font-extrabold text-sm tracking-widest">03 / BLUEPRINT</span>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    <div class="md:col-span-7 glass-card rounded-2xl p-8 md:p-10 border border-blueprint-200">
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6">
+                            VISION
+                        </h2>
+
+                        <p class="text-slate-800 text-lg leading-relaxed mb-6 font-semibold">
+                            To continuously learn, build, experiment, and develop ideas into something meaningful.
+                        </p>
+
+                        <p class="text-slate-700 text-base leading-relaxed mb-4">
+                            I don't want to limit my future to a single path. As I learn and experience more, my direction may evolve.
+                        </p>
+
+                        <p class="text-slate-700 text-base leading-relaxed font-medium">
+                            What remains constant is the intention to build something better than what existed before.
+                        </p>
+                    </div>
+
+                    <div class="md:col-span-5 glass-card rounded-2xl p-6 border border-blueprint-200 bg-white/90">
+                        <div class="font-mono text-xs text-blueprint-600 font-bold mb-4 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-ruler-combined"></i>
+                            <span>ARCHITECTURAL METRICS</span>
+                        </div>
+                        <ul class="space-y-3.5 font-mono text-xs text-slate-700">
+                            <li class="flex justify-between border-b border-slate-200 pb-2">
+                                <span>METHODOLOGY:</span>
+                                <span class="font-bold text-slate-900">EXPERIMENTAL</span>
+                            </li>
+                            <li class="flex justify-between border-b border-slate-200 pb-2">
+                                <span>DISCIPLINE:</span>
+                                <span class="font-bold text-slate-900">MULTI-DISCIPLINARY</span>
+                            </li>
+                            <li class="flex justify-between border-b border-slate-200 pb-2">
+                                <span>ORIENTATION:</span>
+                                <span class="font-bold text-slate-900">LEARN & BUILD</span>
+                            </li>
+                            <li class="flex justify-between">
+                                <span>STATUS:</span>
+                                <span class="font-bold text-emerald-600">EVOLVING CONTINUOUSLY</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="education" class="min-h-screen flex items-center justify-center py-20 px-6">
+            <div class="max-w-4xl w-full">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="font-mono text-blueprint-600 font-extrabold text-sm tracking-widest">04 / STRUCTURE</span>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-10">
+                    EDUCATION
+                </h2>
+
+                <div class="relative border-l-4 border-blueprint-500 ml-4 md:ml-8 space-y-10">
+                    <div class="relative pl-8 md:pl-10 group">
+                        <div class="absolute -left-[13px] top-1.5 w-6 h-6 rounded-full bg-white border-4 border-blueprint-600 group-hover:scale-110 transition-transform shadow-md"></div>
+                        <div class="glass-card rounded-2xl p-6 md:p-8 border border-blueprint-200">
+                            <span class="font-mono text-xs text-blueprint-600 font-bold tracking-wider uppercase block mb-1">SCHOOL</span>
+                            <h3 class="text-2xl font-bold text-slate-900">Florence HIGH School</h3>
+                        </div>
+                    </div>
+
+                    <div class="relative pl-8 md:pl-10 group">
+                        <div class="absolute -left-[13px] top-1.5 w-6 h-6 rounded-full bg-white border-4 border-blueprint-600 group-hover:scale-110 transition-transform shadow-md"></div>
+                        <div class="glass-card rounded-2xl p-6 md:p-8 border border-blueprint-200">
+                            <span class="font-mono text-xs text-blueprint-600 font-bold tracking-wider uppercase block mb-1">PRE-UNIVERSITY</span>
+                            <h3 class="text-2xl font-bold text-slate-900">St. Joseph's Pre-University College</h3>
+                            <p class="text-slate-600 font-mono text-sm mt-2 font-medium">Bengaluru, Karnataka</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="min-h-screen flex items-center justify-center py-20 px-6">
+            <div class="max-w-4xl w-full">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="font-mono text-blueprint-600 font-extrabold text-sm tracking-widest">05 / FLOORS</span>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-10">
+                    SKILLS & LEARNING
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass-card rounded-2xl p-6 border border-blueprint-200 hover:border-blueprint-600 transition-all hover:-translate-y-1 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fa-solid fa-palette text-2xl text-blueprint-600"></i>
+                            <span class="font-mono text-xs font-bold bg-blueprint-50 text-blueprint-700 px-3 py-1 rounded-full border border-blueprint-200">Exploring</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">ADOBE PHOTOSHOP</h3>
+                        <p class="text-xs text-slate-600 font-mono font-medium">Visual design & creative Editing</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 border border-blueprint-200 hover:border-blueprint-600 transition-all hover:-translate-y-1 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fa-solid fa-film text-2xl text-blueprint-600"></i>
+                            <span class="font-mono text-xs font-bold bg-blueprint-50 text-blueprint-700 px-3 py-1 rounded-full border border-blueprint-200">Hands-on</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">ADOBE PREMIERE PRO</h3>
+                        <p class="text-xs text-slate-600 font-mono font-medium">Video editing & production</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 border border-blueprint-200 hover:border-blueprint-600 transition-all hover:-translate-y-1 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fa-solid fa-robot text-2xl text-blueprint-600"></i>
+                            <span class="font-mono text-xs font-bold bg-blueprint-50 text-blueprint-700 px-3 py-1 rounded-full border border-blueprint-200">Exploring</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">AI PLATFORMS</h3>
+                        <p class="text-xs text-slate-600 font-mono font-medium">Prompt engineering & AI tools</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 border border-blueprint-200 hover:border-blueprint-600 transition-all hover:-translate-y-1 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fa-solid fa-microchip text-2xl text-blueprint-600"></i>
+                            <span class="font-mono text-xs font-bold bg-blueprint-50 text-blueprint-700 px-3 py-1 rounded-full border border-blueprint-200">Learning</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">ARDUINO</h3>
+                        <p class="text-xs text-slate-600 font-mono font-medium">Microcontroller experimentation</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 border border-blueprint-200 hover:border-blueprint-600 transition-all hover:-translate-y-1 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fa-solid fa-network-wired text-2xl text-blueprint-600"></i>
+                            <span class="font-mono text-xs font-bold bg-blueprint-50 text-blueprint-700 px-3 py-1 rounded-full border border-blueprint-200">Hands-on</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">IoT PROJECTS</h3>
+                        <p class="text-xs text-slate-600 font-mono font-medium">Hardware & cloud connectivity</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 border border-blueprint-200 hover:border-blueprint-600 transition-all hover:-translate-y-1 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fa-solid fa-code text-2xl text-blueprint-600"></i>
+                            <span class="font-mono text-xs font-bold bg-blueprint-50 text-blueprint-700 px-3 py-1 rounded-full border border-blueprint-200">Hands-on</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">WEBSITE DEVELOPMENT</h3>
+                        <p class="text-xs text-slate-600 font-mono font-medium">Modern web interfaces & layout</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 border border-blueprint-200 hover:border-blueprint-600 transition-all hover:-translate-y-1 shadow-sm sm:col-span-2 lg:col-span-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fa-solid fa-sliders text-2xl text-blueprint-600"></i>
+                            <span class="font-mono text-xs font-bold bg-blueprint-50 text-blueprint-700 px-3 py-1 rounded-full border border-blueprint-200">Learning</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">WEBSITE MANAGEMENT</h3>
+                        <p class="text-xs text-slate-600 font-mono font-medium">Site maintenance & updates</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="min-h-screen flex items-center justify-center py-20 px-6">
+            <div class="max-w-4xl w-full">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="font-mono text-blueprint-600 font-extrabold text-sm tracking-widest">06 / SYSTEMS</span>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-10">
+                    PROJECTS
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-card rounded-2xl p-8 border border-blueprint-200 flex flex-col justify-between group hover:shadow-xl transition-all">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="font-mono text-xs font-bold text-blueprint-700 bg-blueprint-50 px-2.5 py-1 rounded border border-blueprint-200">PROJECT 01</span>
+                                <i class="fa-solid fa-cube text-slate-400 group-hover:text-blueprint-600 transition-colors text-lg"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-3">SSAW</h3>
+                            <p class="text-slate-700 text-sm mb-6 leading-relaxed font-medium">
+                                Website development and management project.
+                            </p>
+                        </div>
+                        <a href="https://shivaagarbathi.com/" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 font-mono text-xs font-bold text-white bg-slate-900 hover:bg-blueprint-600 px-5 py-3.5 rounded-xl transition-all text-center justify-center shadow-md">
+                            <span>VIEW WEBSITE</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                        </a>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 border border-blueprint-200 flex flex-col justify-between group hover:shadow-xl transition-all">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="font-mono text-xs font-bold text-blueprint-700 bg-blueprint-50 px-2.5 py-1 rounded border border-blueprint-200">PROJECT 02</span>
+                                <i class="fa-solid fa-globe text-slate-400 group-hover:text-blueprint-600 transition-colors text-lg"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-3">VS Overseas</h3>
+                            <p class="text-slate-700 text-sm mb-6 leading-relaxed font-medium">
+                                Website development and management project.
+                            </p>
+                        </div>
+                        <a href="https://www.vishnusaioverseas.in/" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 font-mono text-xs font-bold text-white bg-slate-900 hover:bg-blueprint-600 px-5 py-3.5 rounded-xl transition-all text-center justify-center shadow-md">
+                            <span>VIEW WEBSITE</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="build-log" class="min-h-screen flex items-center justify-center py-20 px-6">
+            <div class="max-w-4xl w-full space-y-10">
+                <div class="flex items-center gap-4 mb-2">
+                    <span class="font-mono text-blueprint-600 font-extrabold text-sm tracking-widest">07 / FINISHING</span>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-8 border border-blueprint-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <span class="font-mono text-xs font-bold text-blueprint-600 uppercase tracking-widest block mb-2">DEVELOPMENT ARCHIVE</span>
+                            <h2 class="text-3xl font-extrabold text-slate-900 mb-2">BUILD LOG</h2>
+                            <p class="text-slate-700 text-sm font-medium">A collection of experiments, projects and development work.</p>
+                        </div>
+                        <a href="https://github.com/saiprathickr315-pn" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-3 bg-slate-900 text-white font-mono text-xs font-bold px-6 py-4 rounded-xl hover:bg-blueprint-600 transition-all shrink-0 shadow-md">
+                            <i class="fa-brands fa-github text-lg"></i>
+                            <span>VIEW GITHUB</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-8 md:p-10 border border-blueprint-200 text-center">
+                    <span class="font-mono text-xs font-bold text-blueprint-600 tracking-widest uppercase block mb-6">MISSION SEQUENCE</span>
+                    
+                    <div class="flex flex-wrap items-center justify-center gap-2 md:gap-4 font-mono text-xs md:text-sm font-bold text-slate-900 mb-8">
+                        <span class="bg-white border border-slate-300 px-4 py-2.5 rounded-xl shadow-sm">LEARN</span>
+                        <i class="fa-solid fa-arrow-right text-blueprint-600 text-xs"></i>
+                        <span class="bg-white border border-slate-300 px-4 py-2.5 rounded-xl shadow-sm">EXPERIMENT</span>
+                        <i class="fa-solid fa-arrow-right text-blueprint-600 text-xs"></i>
+                        <span class="bg-white border border-slate-300 px-4 py-2.5 rounded-xl shadow-sm">BUILD</span>
+                        <i class="fa-solid fa-arrow-right text-blueprint-600 text-xs"></i>
+                        <span class="bg-white border border-slate-300 px-4 py-2.5 rounded-xl shadow-sm">IMPROVE</span>
+                        <i class="fa-solid fa-arrow-right text-blueprint-600 text-xs"></i>
+                        <span class="bg-blueprint-600 text-white px-4 py-2.5 rounded-xl shadow-md">REPEAT</span>
+                    </div>
+
+                    <p class="text-slate-700 text-sm md:text-base max-w-xl mx-auto leading-relaxed font-medium">
+                        To develop practical skills, explore emerging technology, work on real projects, and continuously improve through experience.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="min-h-screen flex items-center justify-center py-20 px-6">
+            <div class="max-w-4xl w-full text-center">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="font-mono text-blueprint-600 font-extrabold text-sm tracking-widest">08 / COMPLETE</span>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-8 md:p-14 border border-blueprint-300 shadow-xl relative">
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 font-sans">
+                        LET'S CONNECT
+                    </h2>
+
+                    <p class="text-slate-700 text-base md:text-lg mb-8 max-w-lg mx-auto font-medium">
+                        Feel free to reach out for collaborations, project discussions, or inquiries.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+                        <div class="font-mono text-slate-800 bg-white border border-slate-300 px-6 py-3.5 rounded-xl text-sm font-bold shadow-sm">
+                            saip... @ gmail.com
+                        </div>
+                        <a href="mailto:saiprathickr315@gmail.com" 
+                           class="inline-flex items-center gap-2 bg-blueprint-600 text-white font-mono text-xs font-bold px-7 py-4 rounded-xl hover:bg-blueprint-700 transition-all shadow-md">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>CONTACT ME</span>
+                        </a>
+                    </div>
+
+                    <div class="pt-8 border-t border-slate-200 flex items-center justify-center gap-6">
+                        <a href="https://github.com/saiprathickr315-pn" target="_blank" rel="noopener noreferrer" 
+                           class="text-slate-700 hover:text-blueprint-600 font-mono text-sm font-bold inline-flex items-center gap-2">
+                            <i class="fa-brands fa-github text-xl"></i>
+                            <span>GITHUB ARCHIVE</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-16 text-center space-y-2">
+                    <div class="font-mono font-bold text-slate-900 tracking-wider text-base">
+                        SAI PRATHICK R
+                    </div>
+                    <div class="font-mono text-xs text-blueprint-600 font-bold tracking-widest uppercase">
+                        LEARN • BUILD • EVOLVE
+                    </div>
+                    <p class="font-mono text-xs text-slate-500 pt-2 font-semibold">
+                        "Still building."
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // THREE.JS HIGH-CONTRAST 3D BUILDING GENERATOR
+        let scene, camera, renderer;
+        let groundGrid, foundationPad;
+        let columns = [];
+        let floorBeams = [];
+        let floorSlabs = [];
+        let laserConduits = [];
+        let glassPanels = [];
+        let roofSpire;
+
+        const stageBadge = document.getElementById('stage-badge');
+        const stageNames = [
+            "01/08 SITE",
+            "02/08 FOUNDATION",
+            "03/08 BLUEPRINT",
+            "04/08 STRUCTURE",
+            "05/08 FLOORS",
+            "06/08 SYSTEMS",
+            "07/08 FINISHING",
+            "08/08 COMPLETE"
+        ];
+
+        function init3D() {
+            const container = document.getElementById('webgl-container');
+
+            scene = new THREE.Scene();
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 40);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Lighting for clear 3D Visibility on Light Background
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0x0284c7, 1.5);
+            dirLight.position.set(20, 40, 20);
+            scene.add(dirLight);
+
+            const pointLight = new THREE.PointLight(0xf97316, 2, 50);
+            pointLight.position.set(-10, 10, -10);
+            scene.add(pointLight);
+
+            // --- BUILDABLE 3D SKYSCRAPER COMPONENTS ---
+            const buildingWidth = 12;
+            const buildingDepth = 12;
+            const totalFloors = 6;
+            const floorHeight = 4;
+            const totalHeight = totalFloors * floorHeight;
+
+            // 1. Ground Site Grid
+            groundGrid = new THREE.GridHelper(60, 30, 0x0284c7, 0xcbd5e1);
+            groundGrid.position.y = -2;
+            scene.add(groundGrid);
+
+            // 2. Foundation Concrete Pad
+            const padGeo = new THREE.BoxGeometry(buildingWidth + 4, 0.8, buildingDepth + 4);
+            const padMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
+            foundationPad = new THREE.Mesh(padGeo, padMat);
+            foundationPad.position.y = -1.6;
+            foundationPad.scale.set(0.01, 0.01, 0.01);
+            scene.add(foundationPad);
+
+            // 3. Steel Structural Columns
+            const colGeo = new THREE.CylinderGeometry(0.25, 0.25, totalHeight, 8);
+            const colMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.2 });
+
+            const positions = [
+                [-buildingWidth/2, -buildingDepth/2],
+                [buildingWidth/2, -buildingDepth/2],
+                [-buildingWidth/2, buildingDepth/2],
+                [buildingWidth/2, buildingDepth/2],
+                [0, -buildingDepth/2],
+                [0, buildingDepth/2],
+            ];
+
+            positions.forEach(pos => {
+                const col = new THREE.Mesh(colGeo, colMat);
+                col.position.set(pos[0], -1.2 + totalHeight/2, pos[1]);
+                col.scale.set(1, 0.001, 1); // Grows on scroll
+                scene.add(col);
+                columns.push(col);
+            });
+
+            // 4. Interconnecting Floor Beams & Concrete Slabs
+            for (let f = 1; f <= totalFloors; f++) {
+                const yPos = -1.2 + f * floorHeight;
+                
+                // Slab
+                const slabGeo = new THREE.BoxGeometry(buildingWidth + 0.5, 0.4, buildingDepth + 0.5);
+                const slabMat = new THREE.MeshStandardMaterial({ 
+                    color: 0x334155, 
+                    transparent: true, 
+                    opacity: 0.85 
+                });
+                const slab = new THREE.Mesh(slabGeo, slabMat);
+                slab.position.set(0, yPos, 0);
+                slab.visible = false;
+                scene.add(slab);
+                floorSlabs.push(slab);
+
+                // Wireframe Beam Ring
+                const beamGeo = new THREE.BoxGeometry(buildingWidth + 0.8, 0.5, buildingDepth + 0.8);
+                const beamWire = new THREE.WireframeGeometry(beamGeo);
+                const beamLine = new THREE.LineSegments(beamWire, new THREE.LineBasicMaterial({ color: 0x0284c7, linewidth: 2 }));
+                beamLine.position.set(0, yPos, 0);
+                beamLine.visible = false;
+                scene.add(beamLine);
+                floorBeams.push(beamLine);
+            }
+
+            // 5. Systems / Conduit Glowing Lines
+            const conduitGeo = new THREE.BufferGeometry();
+            const points = [];
+            for (let i = 0; i < 30; i++) {
+                points.push(new THREE.Vector3(
+                    (Math.random() - 0.5) * buildingWidth,
+                    Math.random() * totalHeight - 1,
+                    (Math.random() - 0.5) * buildingDepth
+                ));
+            }
+            conduitGeo.setFromPoints(points);
+            const conduitMat = new THREE.LineBasicMaterial({ color: 0x10b981, linewidth: 3 });
+            const conduits = new THREE.Line(conduitGeo, conduitMat);
+            conduits.visible = false;
+            scene.add(conduits);
+            laserConduits.push(conduits);
+
+            // 6. Finishing Glass Panels
+            const glassGeo = new THREE.BoxGeometry(buildingWidth + 0.2, totalHeight, buildingDepth + 0.2);
+            const glassMat = new THREE.MeshPhysicalMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.35,
+                roughness: 0.1,
+                transmission: 0.9,
+                thickness: 0.5
+            });
+            const glass = new THREE.Mesh(glassGeo, glassMat);
+            glass.position.y = -1.2 + totalHeight / 2;
+            glass.visible = false;
+            scene.add(glass);
+            glassPanels.push(glass);
+
+            // Roof Spire
+            const spireGeo = new THREE.ConeGeometry(0.8, 8, 8);
+            const spireMat = new THREE.MeshStandardMaterial({ color: 0xf97316 });
+            roofSpire = new THREE.Mesh(spireGeo, spireMat);
+            roofSpire.position.set(0, -1.2 + totalHeight + 4, 0);
+            roofSpire.visible = false;
+            scene.add(roofSpire);
+
+            animate3D();
+        }
+
+        function updateBuildingOnScroll() {
+            const scrollTotal = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollProgress = Math.min(Math.max(window.scrollY / scrollTotal, 0), 1);
+
+            // Update Header Progress Text Badge
+            const currentStage = Math.min(Math.floor(scrollProgress * 8), 7);
+            stageBadge.innerText = stageNames[currentStage];
+
+            // 1. Orbit Camera smoothly based on scroll
+            const angle = scrollProgress * Math.PI * 2 + 0.5;
+            const radius = 38 - scrollProgress * 6;
+            camera.position.x = Math.sin(angle) * radius;
+            camera.position.z = Math.cos(angle) * radius;
+            camera.position.y = 8 + scrollProgress * 16;
+            camera.lookAt(0, 8, 0);
+
+            // 2. Foundation Pad Assembly
+            if (scrollProgress >= 0.05) {
+                const padProg = Math.min((scrollProgress - 0.05) / 0.12, 1);
+                foundationPad.scale.set(padProg, padProg, padProg);
+            } else {
+                foundationPad.scale.set(0.001, 0.001, 0.001);
+            }
+
+            // 3. Steel Columns Growth
+            if (scrollProgress >= 0.2) {
+                const colProg = Math.min((scrollProgress - 0.2) / 0.2, 1);
+                columns.forEach(col => col.scale.set(1, Math.max(colProg, 0.001), 1));
+            } else {
+                columns.forEach(col => col.scale.set(1, 0.001, 1));
+            }
+
+            // 4. Floor Slabs & Beams Snap into Place
+            floorSlabs.forEach((slab, idx) => {
+                const threshold = 0.35 + idx * 0.07;
+                if (scrollProgress >= threshold) {
+                    slab.visible = true;
+                    floorBeams[idx].visible = true;
+                } else {
+                    slab.visible = false;
+                    floorBeams[idx].visible = false;
+                }
+            });
+
+            // 5. Electrical Conduit Wiring
+            laserConduits.forEach(c => {
+                c.visible = scrollProgress >= 0.65;
+            });
+
+            // 6. Exterior Glass Panels & Spire
+            glassPanels.forEach(g => {
+                g.visible = scrollProgress >= 0.78;
+            });
+
+            if (roofSpire) {
+                roofSpire.visible = scrollProgress >= 0.88;
+            }
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            // Continuous subtle rotation
+            scene.rotation.y += 0.0015;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        window.addEventListener('scroll', updateBuildingOnScroll);
+
+        window.onload = function() {
+            init3D();
+            updateBuildingOnScroll();
+        };
+    </script>
+</body>
+</html>
